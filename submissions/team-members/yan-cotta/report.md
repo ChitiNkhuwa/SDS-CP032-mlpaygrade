@@ -1,5 +1,63 @@
 # MLPayGrade – Project Report - **Advanced Track**
 
+## Final Project Summary & Authoritative Results
+
+**Status**: ✅ **COMPLETE & DEPLOYED** | **Team Member**: Yan Cotta | **Completion Date**: August 14, 2025
+
+### Project Journey: From Data Leakage to Trustworthy Model
+
+This project's primary achievement was **navigating a critical data leakage issue** and establishing a trustworthy, ceiling-aware model. Our journey demonstrates the importance of rigorous validation over chasing implausibly high metrics.
+
+### Key Findings & Results
+
+**Performance Ceiling Analysis:**
+- **Mean group LOO MAE**: $42,708 (natural variability baseline)
+- **Median group LOO MAE**: $34,218
+- **90th percentile LOO MAE**: $84,760
+- **Data**: 16,494 rows across 600 identical categorical groups
+
+**Final Model Performance (XGBoost Pipeline):**
+- **Test MAE**: $48,512 (2024 test data)
+- **Validation MAE**: $46,301 (2023 validation data)  
+- **Test R²**: 0.124
+- **Pipeline**: Leak-proof sklearn Pipeline with ColumnTransformer
+
+**Uncertainty Quantification (90% Conformal Intervals):**
+- **Empirical coverage**: ~71.9%
+- **Average interval width**: ~$161,475
+- **Interpretation**: Reflects high natural salary variability in the market
+
+**SHAP Feature Importance (Top Drivers):**
+1. Continent (North America premium)
+2. Job Category (Data Analysis, Machine Learning, Management)
+3. Experience Level (SE, EN, MI hierarchy)
+4. Remote Ratio
+5. Company Size
+
+### Technical Implementation
+
+**Leak-Prevention Measures:**
+- Single sklearn Pipeline with transformers fitted only on training data
+- Temporal splits: 2020-2022 train, 2023 validation, 2024 test
+- Data deduplication before modeling
+- No use of preprocessed artifacts that could introduce leakage
+
+**Production Artifacts:**
+- `scripts/utils/feature_engineering.py` — Deterministic feature derivation
+- `scripts/train_xgb_pipeline.py` — Leak-proof XGBoost training
+- `scripts/group_ceiling.py` — Ceiling analysis implementation
+- `streamlit_app.py` — Production deployment with uncertainty
+
+**Model Validation:**
+- Group-aware validation (GroupKFold): MAE ≈ $45,728 (±$3,636)
+- Temporal validation ensuring no future data leakage
+- Conformal prediction for realistic uncertainty estimates
+
+---
+
+**Documentation Note**: Sections below contain historical context from earlier iterations. The metrics above represent the final, authoritative results as of August 14, 2025. Previous sub-$5K MAE claims were artifacts of data leakage and have been superseded by these realistic, ceiling-aware metrics.
+
+
 **Team Member**: Yan Cotta  
 **Project**: MLPayGrade Advanced Deep Learning Track  
 **Completion Date**: August 1, 2025  
@@ -429,7 +487,7 @@ Early Stopping: Monitor='val_loss', patience=20
 
 | Model | MAE (Error) | R² Score | RMSE | Training Time | Business Accuracy |
 |-------|-------------|----------|------|---------------|-------------------|
-| **XGBoost** | **$1,917** | **94.9%** | $16,583 | **1 second** | **95.5% within $5K** |
+| **XGBoost** | **$1,917** | **94.9%** | $16,583 | **1 second** | **95.5% within $5,000** |
 | Neural Network | $15,477 | 90.7% | $22,545 | 23 seconds | 16.1% within $5K |
 | **Advantage** | **87.6% better** | **+4.7%** | **26.4% better** | **23x faster** | **8x more accurate** |
 
@@ -723,7 +781,7 @@ Model: XGBRegressor(
 - 70-15-15 train/validation/test split
 ```
 
-**Generalization Evidence & Justification:**
+**Generalization Evidence & Justification**:
 
 1. **Superior Baseline Performance**:
    - **Validation MAE**: $2,279 with proper feature engineering
@@ -763,8 +821,18 @@ Model: XGBRegressor(
 ✅ **MLflow Integration**: Complete experiment lifecycle management and tracking  
 ✅ **Production Model Selection**: Data-driven champion selected via robust validation
 
-**Week 4 Technical Achievement**: Resolved critical performance inconsistency through proper feature engineering, delivering measurable business value through rigorous data science methodology.
+## Ceiling vs Model — Reality Check
 
-**⏳ Pending Completions**:
-- Neural Network architectural experiments (space reserved for tomorrow)
-- XGBoost hyperparameter optimization (final tuning results)
+- We quantified a performance ceiling using leave-one-out group means on identical categorical profiles (job_category, continent, experience_level, employment_type, company_size, work_year).
+- Ceiling results (on 16,494 rows, 600 groups):
+  - Mean LOO MAE: $42,708.23
+  - Median LOO MAE: $34,217.71
+  - 90th percentile LOO MAE: $84,759.92
+- Our no-leak XGBoost pipeline with a strict temporal split (2020–2022 train, 2023 val, 2024 test) achieves:
+  - Validation MAE: $46,300.78
+  - Test MAE: $48,512.14
+  - Test R²: 0.124
+- Interpretation: Errors are appropriately above the inherent variability ceiling, indicating no data leakage and realistic generalization.
+- Uncertainty communication: Conformal prediction intervals (90% nominal) achieved ~0.719 empirical coverage with average width ≈ $161,475 on the 2024 test set.
+
+This section supersedes earlier overly-optimistic metrics and documents the ceiling-aware, leakage-proof evaluation that will be presented at the final meeting.

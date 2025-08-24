@@ -1,10 +1,36 @@
 # MLPayGrade: Advanced Deep Learning Track
+
+> Important update (Aug 10, 2025): Ceiling-aware evaluation, leakage audit, and realistic re-benchmark completed. See “Executive Update” below. Historical sections further down reflect earlier state and are preserved for context.
+
+## Final Model Performance
+
+Our production model achieves realistic performance metrics that align with the inherent salary variability in the data:
+
+| Metric | Value | Description |
+|--------|-------|-------------|
+| **Test MAE** | **≈ $48.5K** | Mean Absolute Error on 2024 test data |
+| **Test R²** | **≈ 0.124** | Coefficient of determination |
+| **Validation MAE** | **≈ $46.3K** | Performance on 2023 validation data |
+| **Ceiling Analysis** | **≈ $42.7K** | Group leave-one-out baseline MAE |
+
+### Key Project Finding
+
+**The primary outcome of this project was navigating a critical data leakage issue.** Our final, robust model achieves a realistic MAE of ~$48.5K, which aligns with the inherent salary variability ('ceiling') in the data, estimated at a ~$42.7K MAE. This journey underscores the importance of rigorous validation over chasing implausibly high metrics.
+
+**Pipeline Integrity**: Our production model uses a single sklearn Pipeline with ColumnTransformer, ensuring encoders are fitted only on training data, with temporal splits (2020-2022 train, 2023 val, 2024 test) to prevent data leakage.
+
+---
+
+Note on legacy sections below
+
+The sections titled “Week 3/4” with extremely low MAE and very high R² reflect an earlier, leakage-prone workflow and are preserved only for historical context. Please refer to the Executive Update metrics above for the accurate, ceiling-aware results.
+
 ## Predicting Salaries in the Machine Learning Job Market
 
 **Team Member**: Yan Cotta  
 **Track**: Advanced (Deep Learning with Embeddings & Explainability)  
 **Project Timeline**: 5 weeks (July 2025)  
-**Status**: All Weeks 1-4 Complete ✅ **FINAL PRODUCTION MODEL SELECTED**
+**Status**: ✅ **COMPLETE & DEPLOYED**
 
 ---
 
@@ -138,7 +164,7 @@ consolidation_strategy = {
     'MANAGEMENT': ['Data Manager', 'Head of Data', 'Director of Data Science'],
     'SPECIALIZED': [remaining_rare_titles]
 }
-```
+```text
 
 ### **2. Geographic Hierarchy (77 → 8 categories)**
 ```python
@@ -344,9 +370,21 @@ Unlike the beginner track, this implementation features:
 
 **📧 Contact**: Yan Cotta at yanpcotta@gmail.com
 **🔗 Repository**: [SDS-CP032-mlpaygrade](https://github.com/YanCotta/SDS-CP032-mlpaygrade)  
-**📅 Last Updated**: August 1, 2025
+**📅 Last Updated**: August 10, 2025
 
 ## 🎯 Project Status: ✅ COMPLETE & PRODUCTION-READY
+
+### Performance Ceiling and Leakage Audit
+- Explainable-variance ceiling (group LOO MAE across identical categorical combos: job_category, continent, experience_level, employment_type, company_size, work_year):
+    - Mean LOO MAE: $42,708.23
+    - Median LOO MAE: $34,217.71
+    - 90th percentile LOO MAE: $84,759.92
+- Re-benchmarked model (temporal split: 2020–2022 train, 2023 val, 2024 test):
+    - Validation MAE: $46,300.78
+    - Test MAE: $48,512.14
+    - Test R²: 0.124
+- Conclusion: Results align with the intrinsic variability of the problem; prior sub-$5K MAEs were unrealistic and likely due to leakage. We now prevent leakage via a single Pipeline with transformers fitted on train only, after deduplication and temporal splitting.
+- Uncertainty: 90% conformal coverage ≈ 0.719, average interval width ≈ $161,475.
 
 ### 🚀 Week 4 Achievements - Advanced Model Selection & Hyperparameter Tuning
 
@@ -399,3 +437,34 @@ This project represents **enterprise-level data science** with comprehensive mod
 ✅ **Technical Excellence**: Advanced feature engineering and ensemble modeling  
 
 **Status**: 🚀 **PRODUCTION DEPLOYED** - Ready for enterprise salary prediction applications.
+
+## 📁 Project Structure (current)
+
+```
+yan-cotta/
+├── archive/
+│   └── salaries.csv
+├── mlpaygrade_exploration_archive.ipynb
+├── models/
+│   ├── xgb_pipeline.pkl
+│   ├── xgb_metrics.json
+│   ├── xgb_mapie.pkl
+│   └── xgb_intervals.json
+├── outputs/
+│   ├── group_ceiling_metrics.json
+│   ├── group_kfold_metrics.json
+│   ├── group_stats.csv
+│   └── shap_top20.json
+├── report.md
+├── README.md
+├── scripts/
+│   ├── add_cpi_features.py
+│   ├── add_intervals.py
+│   ├── group_ceiling.py
+│   ├── group_kfold_eval.py
+│   ├── shap_importance.py
+│   ├── train_xgb_pipeline.py
+│   └── utils/
+│       └── feature_engineering.py
+└── streamlit_app.py
+```
