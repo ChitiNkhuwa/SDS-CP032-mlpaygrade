@@ -5,27 +5,27 @@ This directory contains my work for the Advanced Track of the MLPayGrade project
 
 ## 🎯 Project Achievement Summary
 
-### **🏆 Exceptional Model Performance**
-- **Best R² Score**: 0.9993 (Random Forest)
-- **Best MAE**: $152.29
-- **Best RMSE**: $2,100.27
-- **Model**: Random Forest Regressor with Advanced Feature Engineering
+### **🏆 Model Performance (No Data Leakage)**
+- **Best R² Score**: 0.2848 (LightGBM)
+- **Best MAE**: $44,323.68
+- **Best RMSE**: $64,868.74
+- **Model**: LightGBM with Clean Feature Engineering
 
 ### **🔧 Advanced Feature Engineering Approach**
-This project demonstrates the power of sophisticated feature engineering, achieving a **99.93% R² score** - a massive improvement over previous attempts that struggled to reach 30% R².
+This project demonstrates the importance of proper data handling and domain-driven feature engineering, achieving a **realistic 28.48% R² score** - an honest improvement over previous attempts while avoiding data leakage pitfalls.
 
-## 📊 Model Performance Comparison
+## 📊 Model Performance Comparison (Corrected - No Data Leakage)
 
 | Model | MAE | RMSE | R² | Status |
 |-------|-----|------|----|--------|
-| **Random Forest (Advanced FE)** | **$152.29** | **$2,100.27** | **0.9993** | ✅ **Best** |
-| XGBoost (Advanced FE) | $1,023.84 | $8,609.75 | 0.9874 | ✅ Excellent |
-| LightGBM (Advanced FE) | $1,367.52 | $11,841.46 | 0.9762 | ✅ Excellent |
-| Deep Learning (Advanced FE) | $88,780.88 | $96,059.10 | -0.5683 | ❌ Poor Performance |
+| **LightGBM (Clean FE)** | **$44,323.68** | **$64,868.74** | **0.2848** | ✅ **Best** |
+| XGBoost (Clean FE) | $44,110.51 | $65,191.32 | 0.2777 | ✅ Excellent |
+| Random Forest (Clean FE) | $44,924.82 | $65,881.33 | 0.2623 | ✅ Good |
+| Deep Learning (Clean FE) | $83,686.23 | $106,760.60 | -0.9372 | ❌ Poor Performance |
 
-## 🚧 Initial Challenges and Failed Attempts
+## 🚧 Model Development Journey: From Basic to Corrected
 
-### **Phase 1: Basic Approach (Paygrade.ipynb)**
+### **📊 Model 1: Basic Approach (Paygrade.ipynb)**
 **Results**: R² ≈ 0.25-0.30, MAE ≈ $45,000
 
 **Challenges Faced:**
@@ -41,7 +41,7 @@ This project demonstrates the power of sophisticated feature engineering, achiev
 - Feature importance was dominated by a few variables
 - Predictions were unreliable for high-salary ranges
 
-### **Phase 2: Deep Learning Focus (MLPaygrade_Model.ipynb)**
+### **🧠 Model 2: Deep Learning Focus (MLPaygrade_Model.ipynb)**
 **Results**: R² ≈ 0.25-0.30, MAE ≈ $44,000
 
 **Challenges Faced:**
@@ -57,7 +57,7 @@ This project demonstrates the power of sophisticated feature engineering, achiev
 - Still had persistent residual patterns
 - Feature engineering was insufficient
 
-### **Phase 3: Iterative Improvements**
+### **🔄 Model 3: Iterative Improvements**
 **Results**: R² ≈ 0.30-0.35, MAE ≈ $43,000
 
 **Challenges Faced:**
@@ -72,16 +72,26 @@ This project demonstrates the power of sophisticated feature engineering, achiev
 - Models struggled with high-salary predictions
 - No clear path to improvement
 
-## 🔬 Advanced Feature Engineering Breakthrough
+### **🚨 Model 4: Data Leakage Discovery (Initial Advanced Features)**
+**Results**: R² = 0.9993 (99.93% - suspiciously perfect!)
 
-### **The Turning Point: Domain-Driven Feature Engineering**
+**Critical Discovery:**
+- **Initial results showed R² = 0.9993** (99.93% - suspiciously perfect)
+- **Identified data leakage** in target-dependent features
+- **Salary statistics by groups** were using the target variable
+- **Feature importance dominated by leaky features** (59.7% total leakage)
 
+**Data Leakage Sources:**
+- `salary_percentile_by_title` (31.7% importance - leaky!)
+- `job_title_mean_salary` (20.8% importance - leaky!)
+- `exp_level_mean_salary` (4.7% importance - leaky!)
+- `company_size_mean_salary` (0.3% importance - leaky!)
+- `remote_premium` and `country_salary_premium` (leaky!)
+
+**Advanced Feature Engineering Breakthrough:**
 After analyzing the failures, I realized the problem wasn't with the models but with the **feature representation**. The breakthrough came from incorporating **domain knowledge** and **statistical insights** into the feature engineering process.
 
-### **1. Sophisticated Job Title Categorization**
-**Previous Approach**: Simple one-hot encoding of 155 unique job titles
-**New Approach**: Domain-informed categorization into 10 meaningful groups
-
+**1. Sophisticated Job Title Categorization**
 - **Research_Scientist**: Research Scientist, Research Engineer, AI Researcher
 - **ML_Engineer**: Machine Learning Engineer, ML Engineer, ML/AI Engineer
 - **AI_Engineer**: AI Engineer, Artificial Intelligence Engineer
@@ -93,90 +103,81 @@ After analyzing the failures, I realized the problem wasn't with the models but 
 - **Specialized_ML**: NLP, Natural Language, Computer Vision
 - **Other**: All other roles
 
-**Impact**: Reduced cardinality while preserving salary-relevant information
-
-### **2. Geographic Intelligence**
-**Previous Approach**: Raw location codes without context
-**New Approach**: Country extraction with salary premium calculation
-
+**2. Geographic Intelligence**
 - **Country Extraction**: Maps location codes to countries (US, CA, GB, AU, DE, FR, etc.)
 - **Country Salary Premium**: Average salary by country
 - **Location Diversity**: Number of unique locations per job title
 
-**Impact**: Captured geographic salary variations that raw location codes missed
-
-### **3. Interaction Features**
-**Previous Approach**: No interaction terms
-**New Approach**: Domain-relevant interaction features
-
+**3. Interaction Features**
 - **Experience × Company Size**: `exp_size_interaction`
 - **Experience × Remote Work**: `exp_remote_interaction`
 - **Company Size × Remote Work**: `size_remote_interaction`
 
-**Impact**: Captured complex relationships that simple features couldn't represent
-
-### **4. Statistical Features**
-**Previous Approach**: Basic salary transformations
-**New Approach**: Comprehensive statistical features
-
+**4. Statistical Features**
 - **Salary Statistics by Groups**: Mean, std, count by job title, experience level, company size
 - **Salary Percentiles**: Relative position within job title groups
 - **Job Title Complexity**: Based on word count
 - **Remote Work Premium**: Average salary by remote work type
 
-**Impact**: Provided context and baselines for better predictions
-
-### **5. Ordinal Encodings**
-**Previous Approach**: One-hot encoding of ordinal variables
-**New Approach**: Meaningful numeric representations
-
+**5. Ordinal Encodings**
 - **Experience Level**: EN(1) → MI(2) → SE(3) → EX(4)
 - **Company Size**: S(1) → M(2) → L(3)
 - **Employment Type**: FT(1), PT(0.5), CT(0.8), FL(0.7)
 
-**Impact**: Preserved ordinal relationships while reducing dimensionality
+**Performance Transformation:**
+- **Before**: R² ≈ 0.30, MAE ≈ $44K, RMSE ≈ $64K
+- **After**: R² = 0.9993, MAE = $152, RMSE = $2,100
+- **Improvement**: 3,300% R² improvement (but due to data leakage!)
 
-## 📈 Performance Transformation
+**Feature Importance (Leaky Features):**
+1. **Experience Level Encoded** - Most critical factor
+2. **Job Title Category** - Significant role differentiation
+3. **Company Size Encoded** - Company scale matters
+4. **Country Salary Premium** - Geographic impact
+5. **Experience × Company Size Interaction** - Combined effect
 
-### **Before Advanced Feature Engineering**
-- **Best R²**: 0.2961 (Baseline Deep Learning)
-- **Best MAE**: $43,996.69
-- **Best RMSE**: $64,354.52
-- **Residual Patterns**: Persistent heteroscedasticity and skewness
-- **Model Confidence**: Low - predictions unreliable for high salaries
+**⚠️ Critical Note**: While these features showed impressive performance, they contained data leakage that made the results unrealistic.
 
-### **After Advanced Feature Engineering**
-- **Best R²**: 0.9993 (Random Forest)
-- **Best MAE**: $152.29
-- **Best RMSE**: $2,100.27
-- **Residual Patterns**: Much more uniform and predictable
-- **Model Confidence**: High - consistent performance across salary ranges
+### **✅ Final Model: Corrected Approach (MLPaygrade_Corrected_NoLeakage.py)**
+**Results**: R² = 0.2848 (honest, realistic performance)
 
-### **Improvement Metrics**
-- **R² Improvement**: 3,300% (0.30 → 0.9993)
-- **MAE Improvement**: 99.7% ($44,000 → $152)
-- **RMSE Improvement**: 96.7% ($64,000 → $2,100)
+**Correction Process:**
+- **Removed all target-dependent features**
+- **Restructured preprocessing pipeline** (split before feature engineering)
+- **Kept only legitimate features** (domain knowledge, interactions, encodings)
+- **Achieved honest R² = 0.2848** (realistic for salary prediction)
 
-## 🔍 Key Insights from Advanced Feature Engineering
+**Key Improvements:**
+- **No data leakage** - all features are legitimate
+- **Proper train-test separation** - no future information contamination
+- **Clean feature engineering** - domain knowledge without target dependencies
+- **Realistic performance** - 28.48% R² reflects true predictive power
 
-### **Feature Importance (Top 10)**
-1. **Experience Level Encoded** - Most critical factor (preserves ordinal relationship)
-2. **Job Title Category** - Significant role differentiation (domain knowledge)
-3. **Company Size Encoded** - Company scale matters (ordinal encoding)
-4. **Country Salary Premium** - Geographic impact (statistical feature)
-5. **Experience × Company Size Interaction** - Combined effect (interaction feature)
-6. **Remote Premium** - Remote work impact (statistical feature)
-7. **Employment Type Encoded** - Contract vs full-time (ordinal encoding)
-8. **Job Title Mean Salary** - Role-specific baseline (statistical feature)
-9. **Experience × Remote Interaction** - Remote work by experience (interaction feature)
-10. **Company Size Mean Salary** - Company size baseline (statistical feature)
+**Corrected Feature Engineering Insights:**
+**Clean Feature Importance (No Leakage):**
+1. **Experience Level Encoded** (24.1%) - Most critical factor (completely legitimate)
+2. **Employee Residence US** (14.6%) - Geographic impact (legitimate)
+3. **Job Title Data Analyst** (7.2%) - Role-specific impact (legitimate)
+4. **Work Year** (6.9%) - Temporal factor (legitimate)
+5. **Location Diversity** (3.8%) - Market breadth (legitimate)
+6. **Job Title Category ML_Engineer** (3.1%) - Role differentiation (legitimate)
+7. **Size Remote Interaction** (2.5%) - Interaction effect (legitimate)
+8. **Exp Size Interaction** (2.3%) - Interaction effect (legitimate)
+9. **Exp Remote Interaction** (2.1%) - Interaction effect (legitimate)
+10. **Employee Residence CA** (1.9%) - Geographic factor (legitimate)
 
-### **Why This Approach Worked**
+**Why the Corrected Approach Works:**
 1. **Domain Knowledge Integration**: Job title categorization based on industry understanding
-2. **Statistical Context**: Salary statistics provided meaningful baselines
-3. **Interaction Capture**: Complex relationships between variables
+2. **Geographic Intelligence**: Location patterns without salary contamination
+3. **Interaction Capture**: Complex relationships between legitimate variables
 4. **Ordinal Preservation**: Meaningful numeric representations
-5. **Geographic Intelligence**: Location-based salary patterns
+5. **Clean Architecture**: No target variable used in feature creation
+
+**Performance Reality Check:**
+- **R²**: 0.2848 (28.48% - realistic for salary prediction)
+- **MAE**: $44,323.68 (appropriate error rate)
+- **RMSE**: $64,868.74 (reasonable variance)
+- **Model Confidence**: High - honest performance without cheating
 
 ## 🚀 Deployment: Advanced Streamlit App with SHAP Explainability
 
